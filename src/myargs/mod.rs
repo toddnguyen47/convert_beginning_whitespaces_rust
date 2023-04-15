@@ -1,6 +1,11 @@
 use clap::{Parser, ValueEnum};
 
 /// Convert beginning whitespaces from space to tab, or vice versa.
+///
+/// Example
+/// ```
+/// convert_beginning_whitespaces_rust --ws-from space --comment-char "*" --num-spaces 4
+/// ```
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct MyArgs {
@@ -12,6 +17,7 @@ pub struct MyArgs {
     #[arg(short, long, value_enum)]
     pub ws_from: WhitespaceChoices,
 
+    /// Optional: character that starts a multi-line comment
     #[arg(short, long)]
     pub comment_char: Option<String>,
 
