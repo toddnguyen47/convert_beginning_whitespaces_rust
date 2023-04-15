@@ -33,16 +33,27 @@ impl ConvertLine for ConvertBeginningTabs {
                     && c1.to_string().eq_ignore_ascii_case(comment_char)
                 {
                     comment_line = true;
-                    count_other_whitespace -= 1;
+                    if count_other_whitespace > 0 {
+                        count_other_whitespace -= 1;
+                    }
                 }
                 break;
             }
             index += 1;
         }
 
+        // If first_char_index is 0 then the line is all whitespace; thus we should return an empty line
+        if first_char_index == 0 {
+            return String::from("");
+        }
+
         let cur_new_str_trimmed = line[first_char_index..].trim_end();
-        let spaces_count_quotient = (count_other_whitespace / args.num_spaces as usize) as usize;
-        let total_spaces = (count_tab + spaces_count_quotient) * args.num_spaces as usize;
+        let mut num_spaces = args.num_spaces;
+        if num_spaces == 0 {
+            num_spaces = 1;
+        }
+        let spaces_count_quotient = (count_other_whitespace / num_spaces as usize) as usize;
+        let total_spaces = (count_tab + spaces_count_quotient) * num_spaces as usize;
         let new_str = vec![constants::STR_SPACE; total_spaces];
         let beginning_ws = new_str.join("");
         let results: String;
@@ -77,7 +88,7 @@ mod tests {
         let new_line = sut_convert.convert(&args, str1);
         // -- ARRAGE --
         let expected = "        hello world";
-        assert_eq!(expected, new_line)
+        assert_eq!(expected, new_line);
     }
 
     #[test]
@@ -95,7 +106,7 @@ mod tests {
         let new_line = sut_convert.convert(&args, str1);
         // -- ARRAGE --
         let expected = "            hello 	world";
-        assert_eq!(expected, new_line)
+        assert_eq!(expected, new_line);
     }
 
     #[test]
@@ -113,7 +124,7 @@ mod tests {
         let new_line = sut_convert.convert(&args, str1);
         // -- ARRAGE --
         let expected = "        hello 	world";
-        assert_eq!(expected, new_line)
+        assert_eq!(expected, new_line);
     }
 
     #[test]
@@ -131,7 +142,7 @@ mod tests {
         let new_line = sut_convert.convert(&args, str1);
         // -- ARRAGE --
         let expected = "             * hello 	world";
-        assert_eq!(expected, new_line)
+        assert_eq!(expected, new_line);
     }
 
     #[test]
@@ -149,6 +160,24 @@ mod tests {
         let new_line = sut_convert.convert(&args, str1);
         // -- ARRAGE --
         let expected = "         * hello 	world";
-        assert_eq!(expected, new_line)
+        assert_eq!(expected, new_line);
+    }
+
+    #[test]
+    fn test_given_comment_char_with_just_one_tab_then_have_an_extra_space() {
+        // -- ARRANGE --
+        let args: MyArgs = MyArgs {
+            num_spaces: 2,
+            ws_from: myargs::WhitespaceChoices::Space,
+            comment_char: Option::Some("*".to_string()),
+            files: vec!["".to_string()],
+        };
+        let str1 = "	* hello 	world";
+        let sut_convert = ConvertBeginningTabs {};
+        // -- ACT --
+        let new_line = sut_convert.convert(&args, str1);
+        // -- ARRAGE --
+        let expected = "   * hello 	world";
+        assert_eq!(expected, new_line);
     }
 }
