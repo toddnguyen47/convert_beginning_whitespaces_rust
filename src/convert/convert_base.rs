@@ -10,7 +10,7 @@ pub trait ConvertLine {
 pub fn convert_base(args: &myargs::MyArgs, input_trait: impl ConvertLine) {
     for file in &args.files {
         let contents = fs::read_to_string(file).expect("Should have been able to read the file");
-        println!("Finished reading");
+        println!("Finished reading from: {}", file);
         let lines = contents.lines();
         let mut new_lines: Vec<String> = vec![];
         for line in lines {
